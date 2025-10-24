@@ -1,4 +1,4 @@
-﻿import os, time, gzip, io, hashlib
+﻿import os, time, hashlib
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import requests
@@ -29,12 +29,6 @@ def health(request):
 
 def _sha256(b: bytes) -> str:
     h = hashlib.sha256(); h.update(b); return h.hexdigest()
-
-def _gzip_size(b: bytes) -> int:
-    buf = io.BytesIO()
-    with gzip.GzipFile(fileobj=buf, mode="wb") as z:
-        z.write(b)
-    return len(buf.getvalue())
 
 @csrf_exempt
 def upload(request):
