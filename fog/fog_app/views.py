@@ -39,21 +39,18 @@ def upload(request):
         f = next(iter(request.FILES.values()))
         data = f.read()
         filename = f.name
-        content_type = f.content_type
     else:
         data = request.body or b""
         filename = request.headers.get("X-Filename", "payload.bin")
-        content_type = request.headers.get("Content-Type", "application/octet-stream")
 
     size = len(data); ts = time.time()
-    _log_event({"source":"fog","ip":ip,"size":size,"ts":ts,"endpoint":"/upload","filename":filename,"ctype":content_type})
 
     if not _check_rate_limit(ip):
         _log_event({"source":"fog","event":"rate_limit_exceeded","ip":ip,"ts":ts})
         return JsonResponse({"error":"rate limit exceeded"}, status=429)
 
-    # Decision
     if size <= SIZE_THRESHOLD:
+        _log_event({"source":"fog","event":"process_locally","ip":ip,"endpoint":"/upload","filename":filename,"size":size,"ts":ts})
         # process locally (whole bytes)
         local = {
             "processed_by": "fog",
@@ -68,6 +65,7 @@ def upload(request):
             cloud = {"error":"cloud unreachable","detail":str(e)}
         return JsonResponse({"status":"ok","mode":"small","local":local,"cloud":cloud})
     else:
+        _log_event({"source":"fog","event":"split_workload","ip":ip,"endpoint":"/upload","filename":filename,"size":size,"ts":ts})
         # split workload: fog first half, cloud second half
         half = size // 2
         part1, part2 = data[:half], data[half:]

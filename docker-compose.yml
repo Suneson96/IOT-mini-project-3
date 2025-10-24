@@ -50,6 +50,7 @@
     environment:
       - FILE=/app/samples/Test-large.jpg
       - FOG_URL=http://fog:8000/upload
+
   # client_dos:
   #   build: ./clients
   #   depends_on:
