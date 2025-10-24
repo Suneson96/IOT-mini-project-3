@@ -37,7 +37,7 @@ def _gzip_size(b: bytes) -> int:
     return len(buf.getvalue())
 
 @csrf_exempt
-def ingest(request):
+def upload(request):
     ip = request.META.get('REMOTE_ADDR', 'unknown')
 
     # Accept both JSON and multipart/form-data
@@ -52,7 +52,7 @@ def ingest(request):
         content_type = request.headers.get("Content-Type", "application/octet-stream")
 
     size = len(data); ts = time.time()
-    _log_event({"source":"fog","ip":ip,"size":size,"ts":ts,"endpoint":"/ingest","filename":filename,"ctype":content_type})
+    _log_event({"source":"fog","ip":ip,"size":size,"ts":ts,"endpoint":"/upload","filename":filename,"ctype":content_type})
 
     if not _check_rate_limit(ip):
         _log_event({"source":"fog","event":"rate_limit_exceeded","ip":ip,"ts":ts})

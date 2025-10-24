@@ -1,5 +1,5 @@
 ﻿from django.urls import path
-from .views import health, ingest
-urlpatterns=[path('ingest', ingest),
+from .views import health, upload
+urlpatterns=[path('upload', upload),
     path('health', health),
     ]

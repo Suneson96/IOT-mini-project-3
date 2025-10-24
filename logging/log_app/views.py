@@ -12,7 +12,7 @@ def log_entry(request):
     except Exception: j={'raw':request.body.decode('utf-8','ignore')}
     j['received_ts']=time.time()
     os.makedirs(os.path.dirname(LOGFILE), exist_ok=True)
-    with open(LOGFILE,'a') as f: f.write(json.dumps(j)+'')
+    with open(LOGFILE,'a') as f: f.write(json.dumps(j)+'\n')
     return JsonResponse({'status':'ok'}, status=201)
 def get_logs(request):
     if os.path.exists(LOGFILE):
