@@ -1,0 +1,60 @@
+﻿services:
+  fog:
+    build: ./fog
+    ports:
+      - "8000:8000"
+    environment:
+      - SIZE_THRESHOLD=51200
+      - LOG_SERVICE_URL=http://logging:8000/log
+      - CLOUD_URL=http://cloud:8000/process
+    depends_on:
+      - cloud
+      - logging
+    healthcheck:
+      # Use Python (present in the image) to probe /health. The base slim
+      # image doesn't include curl, so invoking curl inside the container
+      # fails. This one-liner uses urllib to avoid adding packages to the image.
+      test: [ "CMD", "python", "-c", "import urllib.request,sys; r=urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2); sys.exit(0 if getattr(r,'status',200)==200 else 1)" ]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
+  cloud:
+    build: ./cloud
+    ports:
+      - "8001:8000"
+
+  logging:
+    build: ./logging
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./logs:/app/logs
+
+  client1:
+    build: ./clients
+    depends_on:
+      fog:
+        condition: service_healthy
+    volumes:
+      - ./samples:/app/samples
+    environment:
+      - FILE=/app/samples/Test-small.svg
+      - FOG_URL=http://fog:8000/ingest
+
+  client2:
+    build: ./clients
+    depends_on:
+      fog:
+        condition: service_healthy
+
+    volumes:
+      - ./samples:/app/samples
+    environment:
+      - FILE=/app/samples/Test-large.jpg
+      - FOG_URL=http://fog:8000/ingest
+  # client_dos:
+  #   build: ./clients
+  #   depends_on:
+  #     - fog
+  #   command: [ "python", "client_dos.py" ]
