@@ -14,6 +14,7 @@ def log_entry(request):
     os.makedirs(os.path.dirname(LOGFILE), exist_ok=True)
     with open(LOGFILE,'a') as f: f.write(json.dumps(j)+'\n')
     return JsonResponse({'status':'ok'}, status=201)
+
 def get_logs(request):
     if os.path.exists(LOGFILE):
         with open(LOGFILE) as f: return HttpResponse(f.read(), content_type='text/plain')
